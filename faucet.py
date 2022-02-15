@@ -47,6 +47,8 @@ def faucet_send():
     if address[0:2] != "0x":
         address = '0x' + address
 
+    address = Web3.toChecksumAddress(address)
+
     if not Web3.isAddress(address):
         logging.error("{} not an address".format(address))
         return jsonify({'success': False,
