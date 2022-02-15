@@ -3,6 +3,9 @@ from web3 import Web3, HTTPProvider
 from decimal import Decimal
 import json
 from os import environ
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SK = environ.get('SK')
 CONTRACT_ADDRESS = environ.get('CONTRACT_ADDRESS')
@@ -22,6 +25,7 @@ app = Flask(__name__)
 def request_eth():
     balance=Decimal(w3.eth.getBalance(CONTRACT_ADDRESS))
     return f"""
+Viene utilizzato il contratto all'indirizzo f{CONTRACT_ADDRESS}<br/>
 Il bilancio attuale del faucet è {balance/oneEth} eth<br/>
 <form method="GET" action="/faucet">
     <input type="text" name="address">
@@ -33,6 +37,10 @@ Il bilancio attuale del faucet è {balance/oneEth} eth<br/>
 @app.route("/faucet")
 def faucet_send():
     address = request.args['address']
+
+    if address[0:2] != "0x":
+        address = '0x' + address
+
     faucetContract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=FAUCET_ABI)
     nonce = w3.eth.getTransactionCount(account.address)
     transfer_tx = faucetContract.functions.transfer(address).buildTransaction({
@@ -44,4 +52,4 @@ def faucet_send():
     })
     signed = account.signTransaction(transfer_tx)
     txid=w3.eth.sendRawTransaction(signed.rawTransaction).hex()
-    return f"Transaction id {txid}"
+    return f"{txid}"
