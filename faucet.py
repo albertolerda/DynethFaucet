@@ -57,19 +57,25 @@ def faucet_send():
         logging.error("{} not an address".format(address))
         return jsonify({'success': False,
                         'error': "{} not an address".format(address)})
-
-    faucetContract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=FAUCET_ABI)
-    nonce = w3.eth.getTransactionCount(account.address)
-    transfer_tx = faucetContract.functions.transfer(address).buildTransaction({
-        'chainId': CHAIN_ID,
-        'from': account.address,
-        'gas': GAS_LIMIT,
-        'gasPrice': w3.toWei(GWEI_PRICE, 'gwei'),
-        'nonce': nonce,
-    })
-    signed = account.signTransaction(transfer_tx)
-    txid = w3.eth.sendRawTransaction(signed.rawTransaction).hex()
-    addresses_log.write("{},{},{},{}\n".format(datetime.datetime.now(),
-                                               request.remote_addr,
-                                               address, txid))
-    return jsonify({'success': True, 'txid': f'{txid}'})
+    try:
+        faucetContract = w3.eth.contract(address=CONTRACT_ADDRESS,
+                                         abi=FAUCET_ABI)
+        nonce = w3.eth.getTransactionCount(account.address)
+        transfer_tx = faucetContract.functions.transfer(address) \
+            .buildTransaction({
+                'chainId': CHAIN_ID,
+                'from': account.address,
+                'gas': GAS_LIMIT,
+                'gasPrice': w3.toWei(GWEI_PRICE, 'gwei'),
+                'nonce': nonce,
+            })
+        signed = account.signTransaction(transfer_tx)
+        txid = w3.eth.sendRawTransaction(signed.rawTransaction).hex()
+        addresses_log.write("{},{},{},{}\n".format(datetime.datetime.now(),
+                                                   request.remote_addr,
+                                                   address, txid))
+        return jsonify({'success': True, 'txid': f'{txid}'})
+    except:
+        return jsonify({'success': False,
+                        'error': 'an error occurred while creating and ' +
+                                 'signing the transaction'})
