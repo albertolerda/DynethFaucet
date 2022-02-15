@@ -6,7 +6,7 @@ from decimal import Decimal
 from os import environ
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from web3 import HTTPProvider, Web3
 
 load_dotenv()
@@ -36,14 +36,8 @@ app = Flask(__name__)
 @app.route("/")
 def request_eth():
     balance = Decimal(w3.eth.getBalance(CONTRACT_ADDRESS))
-    return f"""
-Viene utilizzato il contratto all'indirizzo {CONTRACT_ADDRESS}<br/>
-Il bilancio attuale del faucet è {balance/oneEth} eth<br/>
-<form method="GET" action="/faucet">
-    <input type="text" name="address">
-    <input type="submit" value="Send request">
-</form>
-"""
+    return render_template('index.html', contract_address = CONTRACT_ADDRESS,
+                           balance = balance / oneEth )
 
 
 @app.route("/faucet")
