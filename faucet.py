@@ -8,9 +8,8 @@ SK = environ.get('SK')
 CONTRACT_ADDRESS = environ.get('CONTRACT_ADDRESS')
 FAUCET_ABI = json.loads(environ.get('FAUCET_ABI'))
 CHAIN_ID=int(environ.get('CHAIN_ID'))
-
-
-print(CHAIN_ID)
+GAS_LIMIT=int(environ.get('GAS_LIMIT'))
+GWEI_PRICE=environ.get('GWEI_PRICE')
 
 w3 = Web3(HTTPProvider('http://127.0.0.1:8545'))
 account = w3.eth.account.privateKeyToAccount(SK)
@@ -39,8 +38,8 @@ def faucet_send():
     transfer_tx = faucetContract.functions.transfer(address).buildTransaction({
         'chainId': CHAIN_ID,
         'from': account.address,
-        'gas': 70000,
-        'gasPrice': w3.toWei('10', 'gwei'),
+        'gas': GAS_LIMIT,
+        'gasPrice': w3.toWei(GWEI_PRICE, 'gwei'),
         'nonce': nonce,
     })
     signed = account.signTransaction(transfer_tx)
